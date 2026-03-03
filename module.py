@@ -29,3 +29,16 @@ PERMISSIONS = [
 'campaigns.delete_campaign',
 'campaigns.manage_settings',
 ]
+
+ROLE_PERMISSIONS = {
+    "admin": ["*"],
+    "manager": [
+        "add_campaign",
+        "change_campaign",
+        "view_campaign",
+    ],
+    "employee": [
+        "add_campaign",
+        "view_campaign",
+    ],
+}
