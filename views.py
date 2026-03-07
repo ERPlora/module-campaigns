@@ -3,6 +3,8 @@ Marketing Campaigns Module Views
 """
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
+from django.http import HttpResponse
+from django.urls import reverse
 from django.shortcuts import get_object_or_404, render as django_render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -113,6 +115,7 @@ def campaigns_list(request):
     }
 
 @login_required
+@htmx_view('campaigns/pages/campaign_add.html', 'campaigns/partials/campaign_add_content.html')
 def campaign_add(request):
     hub_id = request.session.get('hub_id')
     if request.method == 'POST':
@@ -134,10 +137,13 @@ def campaign_add(request):
         obj.description = description
         obj.is_active = is_active
         obj.save()
-        return _render_campaigns_list(request, hub_id)
-    return django_render(request, 'campaigns/partials/panel_campaign_add.html', {})
+        response = HttpResponse(status=204)
+        response['HX-Redirect'] = reverse('campaigns:campaigns_list')
+        return response
+    return {}
 
 @login_required
+@htmx_view('campaigns/pages/campaign_edit.html', 'campaigns/partials/campaign_edit_content.html')
 def campaign_edit(request, pk):
     hub_id = request.session.get('hub_id')
     obj = get_object_or_404(Campaign, pk=pk, hub_id=hub_id, is_deleted=False)
@@ -152,7 +158,7 @@ def campaign_edit(request, pk):
         obj.is_active = request.POST.get('is_active') == 'on'
         obj.save()
         return _render_campaigns_list(request, hub_id)
-    return django_render(request, 'campaigns/partials/panel_campaign_edit.html', {'obj': obj})
+    return {'obj': obj}
 
 @login_required
 @require_POST
